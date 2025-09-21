@@ -1,0 +1,210 @@
+
+# Claude Code Environment Variables
+export ANTHROPIC_BASE_URL="https://api.claudecode-cn.com/api/claudecode"
+export ANTHROPIC_API_KEY="sk-ant-api03-EqZFHoXOTJooRfuTU7Rc1OVvhdtHO56NgSjcbZVsuaui9PJicXJ6BcRnPwhnp4yz54OtyJMObcCfh28JAYNzWg"
+export ANTHROPIC_AUTH_TOKEN=""
+# End Claude Code Environment Variables
+
+# =============================================================================
+# ZSH Configuration
+# =============================================================================
+
+# Enable colors
+autoload -U colors && colors
+
+# History settings
+HISTSIZE=10000
+SAVEHIST=10000
+HISTFILE=~/.zsh_history
+setopt appendhistory
+setopt sharehistory
+setopt incappendhistory
+setopt histignoredups
+setopt histignorealldups
+setopt histignorespace
+
+# Enhanced completion system
+autoload -U compinit
+compinit
+
+# Add custom completions
+fpath=(~/.zsh-plugins/zsh-completions/src $fpath)
+
+# Completion styling
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*:descriptions' format '%F{yellow}-- %d --%f'
+zstyle ':completion:*:messages' format '%F{purple} -- %d --%f'
+zstyle ':completion:*:warnings' format '%F{red}-- no matches found --%f'
+zstyle ':completion:*:corrections' format '%F{green}-- %d (errors: %e) --%f'
+
+# Advanced completion options
+setopt completealiases
+setopt auto_menu
+setopt always_to_end
+setopt complete_in_word
+setopt flow_control
+unsetopt menu_complete
+unsetopt flowcontrol
+
+# Kill completion
+zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#) ([0-9a-z-]#)*=01;34=0=01'
+zstyle ':completion:*:*:*:*:processes' command "ps -u $USER -o pid,user,comm -w -w"
+
+# SSH/SCP hostname completion
+zstyle ':completion:*:(ssh|scp|sftp):*' hosts $hosts
+zstyle ':completion:*:(ssh|scp|sftp):*' users $users
+
+# Directory completion
+zstyle ':completion:*:cd:*' ignore-parents parent pwd
+zstyle ':completion:*' squeeze-slashes true
+
+# Case insensitive completion
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+
+# Navigation options
+setopt autocd
+setopt autopushd
+setopt pushdignoredups
+# setopt correctall  # Disabled to avoid annoying corrections
+
+# Better globbing
+setopt extendedglob
+
+# Pure theme
+fpath+=($HOME/.zsh-themes/pure)
+autoload -U promptinit; promptinit
+prompt pure
+
+# =============================================================================
+# Aliases
+# =============================================================================
+
+# Basic aliases
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+alias ls='ls -G'  # Enable colors on macOS
+
+# Navigation
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias ~='cd ~'
+
+# Git aliases
+alias g='git'
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit'
+alias gp='git push'
+alias gl='git pull'
+alias gd='git diff'
+alias gb='git branch'
+alias gco='git checkout'
+alias glog='git log --oneline --graph --decorate'
+
+# System
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+alias df='df -h'
+alias du='du -h'
+alias free='top -l 1 -s 0 | grep PhysMem'
+alias ps='ps aux'
+
+# Network
+alias ping='ping -c 5'
+alias ports='netstat -tulanp'
+
+# Development
+alias python='python3'
+alias pip='pip3'
+
+# =============================================================================
+# Functions
+# =============================================================================
+
+# Make directory and cd into it
+mkcd() {
+    mkdir -p "$1" && cd "$1"
+}
+
+# Extract various archive formats
+extract() {
+    if [ -f $1 ] ; then
+        case $1 in
+            *.tar.bz2)   tar xjf $1     ;;
+            *.tar.gz)    tar xzf $1     ;;
+            *.bz2)       bunzip2 $1     ;;
+            *.rar)       unrar e $1     ;;
+            *.gz)        gunzip $1      ;;
+            *.tar)       tar xf $1      ;;
+            *.tbz2)      tar xjf $1     ;;
+            *.tgz)       tar xzf $1     ;;
+            *.zip)       unzip $1       ;;
+            *.Z)         uncompress $1  ;;
+            *.7z)        7z x $1        ;;
+            *)     echo "'$1' cannot be extracted via extract()" ;;
+        esac
+    else
+        echo "'$1' is not a valid file"
+    fi
+}
+
+# Find and kill process by name
+killp() {
+    ps aux | grep $1 | grep -v grep | awk '{print $2}' | xargs kill -9
+}
+
+# Quick server
+server() {
+    local port="${1:-8000}"
+    python3 -m http.server "$port"
+}
+
+# =============================================================================
+# Path Configuration
+# =============================================================================
+
+# Add common development paths
+export PATH="/usr/local/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="/opt/homebrew/bin:$PATH"  # For Apple Silicon Homebrew
+
+# =============================================================================
+# Environment Variables
+# =============================================================================
+
+export EDITOR='nano'
+export VISUAL='nano'
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# Pure theme settings
+zstyle :prompt:pure:path color cyan
+zstyle :prompt:pure:git:branch color blue
+zstyle :prompt:pure:git:action color yellow
+zstyle :prompt:pure:git:dirty color magenta
+
+# =============================================================================
+# ZSH Plugins
+# =============================================================================
+
+# Command history suggestions (gray text as you type)
+source ~/.zsh-plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+# Syntax highlighting (colors for valid/invalid commands)
+source ~/.zsh-plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+# Plugin settings
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=8,underline"
+ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+ZSH_AUTOSUGGEST_USE_ASYNC=true
+
+# iTerm2 integration
+test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+
